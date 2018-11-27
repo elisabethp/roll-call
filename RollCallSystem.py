@@ -3,78 +3,9 @@ import cv2
 import wx
 from PIL import Image
 import os
+import copy
 
 #import Interface.rollCallStart
-
-class Class:
-
-    name = None
-    professor = None
-    students = []
-
-    def __init__(self, name, professor):
-        self.name = name
-        self.professor = professor
-
-    def getName(self):
-        return self.name
-
-    def setName(self, name):
-        self.name = name
-
-    def getProfessor(self):
-        return self.professor
-
-    def setProfessor(self, professor):
-        self.professor = professor
-
-    def getStudents(self):
-        return self.students
-
-    def addStudent(self, student):
-        return self.students.append(student)
-        
-    def removeStudent(self, student):
-
-        for i in range(len(self.students)):
-            if (student.getName() == self.students[i].getName()):
-                return self.students.pop(i)
-                
-    def printSummary(self):
-        print("You are currently reading the summary for " + self.name + " taught by " + self.professor + ".")
-        print("There are " + str(len(self.students)) + " student(s) in this class.")
-        print("\nHere are the students in this class:")
-        print("_______________\n")
-
-        for i in range(len(self.students)):
-            print(str(i+1) + ". " + self.students[i].getName())
-
-        print("\n_______________")
-        print("\nEnd of class summary.")   
-
-class Student:
-
-    name = None
-    absent = True
-    sample = []
- 
-    def __init__(self, name):
-        self.name = name
-
-    def getName(self):
-        return self.name
-
-    def setName(self, name):
-        self.name = name
-
-    def isAbsent(self):
-        return self.absent
-
-    def set_present(self):
-        self.absent = False
-
-    def set_absent(self):
-        self.absent = True
 
 class RollCallSystem:
     
@@ -85,8 +16,9 @@ class RollCallSystem:
 
     def __init__(self, classObject):
         self.class_obj = classObject
+
         #Interface.rollCallStart.MyFrame1.__init__(self, None)
-        self.detector = cv2.CascadeClassifier('Cascades/haarcascade_frontalface_default.xml')
+        self.detector = cv2.CascadeClassifier('cascades/haarcascade_frontalface_default.xml')
         self.recognizer = cv2.face.LBPHFaceRecognizer_create()
 
         print ("\n [INFO] Training faces. It will take a few seconds. Wait ...")
@@ -104,7 +36,9 @@ class RollCallSystem:
         #iniciate id counter
         id = 0
         # names related to ids: example ==> Marcelo: id=1,  etc
-        names = ["None",'Elisabeth'] 
+        names = copy.deepcopy(classObject.students)
+        names.insert(0, "None")
+        print(len(names))
 
         cap = cv2.VideoCapture(0)
         cap.set(3,640) # set Width
@@ -125,10 +59,15 @@ class RollCallSystem:
             for (x,y,w,h) in faces:
                 cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
                 id, confidence = self.recognizer.predict(gray[y:y+h,x:x+w])
-                
+
                 # Check if confidence is less them 100 ==> "0" is perfect match 
                 if (confidence < 100):
-                    id = names[id]
+
+                    if classObject.students[id-1].isAbsent(): #None value skews the order
+                        classObject.printSummary()
+
+                    classObject.students[id-1].set_present()
+                    id = names[id].getName()
                     confidence = "  {0}%".format(round(100 - confidence))
                 else:
                     id = "unknown"
@@ -151,7 +90,6 @@ class RollCallSystem:
         ids = []
         for imagePath in imagePaths:
             if imagePath == "dataset/.DS_Store":
-                #print("hey")
                 continue
             PIL_img = Image.open(imagePath).convert('L') # convert it to grayscale
             img_numpy = np.array(PIL_img,'uint8')
@@ -162,12 +100,3 @@ class RollCallSystem:
                 ids.append(id)
         return faceSamples,ids
 
-def main():
-
-    class_1 = Class(name="Biology", professor="Mr. Smith")
-    student_1 = Student(name="Elisabeth Petit - Bois")
-    class_1.addStudent(student_1)
-    rcs = RollCallSystem(class_1)
-
-
-main()
