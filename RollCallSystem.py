@@ -1,3 +1,8 @@
+import numpy as np
+import cv2
+import wx
+import Interface.rollCallStart
+
 class Class:
 
     name = None
@@ -17,8 +22,8 @@ class Class:
     def getProfessor(self):
         return self.professor
 
-    def setProfessor(self, prof):
-        self.professor = prof
+    def setProfessor(self, professor):
+        self.professor = professor
 
     def getStudents(self):
         return self.students
@@ -58,6 +63,17 @@ class Student:
     def getName(self):
         return self.name
 
+    def setName(self, name):
+        self.name = name
+
+    def isAbsent(self):
+        return self.absent
+
+    def set_present(self):
+        self.absent = False
+
+    def set_absent(self):
+        self.absent = True
 
 class RollCallSystem:
     
@@ -65,6 +81,7 @@ class RollCallSystem:
 
     def __init__(self, classObject):
         self.class_obj = classObject
+        Interface.rollCallStart.MyFrame1.__init__(self, None)
         
 
 def main():
@@ -73,7 +90,31 @@ def main():
     student_1 = Student(name="Elisabeth Petit - Bois")
     class_1.addStudent(student_1)
 
-    class_1.printSummary()
+    faceCascade = cv2.CascadeClassifier('Cascades/haarcascade_frontalface_default.xml')
+    cap = cv2.VideoCapture(0)
+    cap.set(3,640) # set Width
+    cap.set(4,480) # set Height
+    while True:
+        ret, img = cap.read()
+        #img = cv2.flip(img, -1)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = faceCascade.detectMultiScale(
+            gray,     
+            scaleFactor=1.2,
+            minNeighbors=5,     
+            minSize=(20, 20)
+        )
+        for (x,y,w,h) in faces:
+            cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+            roi_gray = gray[y:y+h, x:x+w]
+            roi_color = img[y:y+h, x:x+w]  
+        cv2.imshow('video',img)
+        k = cv2.waitKey(30) & 0xff
+        if k == 27: # press 'ESC' to quit
+            class_1.printSummary()
+            break
+    cap.release()
+    cv2.destroyAllWindows()
 
 
 main()
