@@ -35,6 +35,7 @@ class Class:
                 return self.students.pop(i)
     
     def printSummary(self):
+        print("\n_______________\n")
         print("You are currently reading the summary for " + self.name + " taught by " + self.professor + ".")
         print("There are " + str(len(self.students)) + " student(s) in this class.")
         print("\nHere are the students in this class:")
@@ -74,10 +75,26 @@ class Student:
 def main():
 
     class_1 = Class(name="Biology", professor="Mr. Smith")
+    class_1.printSummary()
+
     student_1 = Student(name="Elisabeth Petit - Bois")
     class_1.addStudent(student_1)
-
     class_1.printSummary()
+
+    class_1.setName("Mathematics")
+    class_1.setProfessor("Mr. Walker")
+    class_1.printSummary()
+
+    student_1.setName("Student Number 1")
+    class_1.printSummary()
+
+    student_2 = Student(name="Elisabeth Petit - Bois")
+    class_1.addStudent(student_2)
+    class_1.printSummary()
+
+    class_1.removeStudent(student_1)
+    class_1.printSummary()
+
 
     rcs = r.RollCallSystem(class_1)
 

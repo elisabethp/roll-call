@@ -5,7 +5,7 @@ from PIL import Image
 import os
 import copy
 
-import interface.rollCallStart
+#import Interface.rollCallStart
 
 class RollCallSystem:
     
@@ -17,7 +17,7 @@ class RollCallSystem:
     def __init__(self, classObject):
         self.class_obj = classObject
 
-        interface.rollCallStart.MyFrame1.__init__(self, None)
+        #Interface.rollCallStart.MyFrame1.__init__(self, None)
         self.detector = cv2.CascadeClassifier('cascades/haarcascade_frontalface_default.xml')
         self.recognizer = cv2.face.LBPHFaceRecognizer_create()
 
